@@ -1,24 +1,25 @@
 {
-    "cSpell.words": [
-        "Backend",
-        "LOCALAPPDATA",
-        "MSEDGE",
-        "activitybar",
-        "blackbox",
-        "devtool",
-        "edgedevtools",
-        "finalhandler",
-        "geolocations",
-        "monospace",
-        "opencode",
-        "repo",
-        "repos",
-        "revealable",
-        "screencast",
-        "undocked",
-        "unhandledrejection",
-        "userdatadir",
-        "vsce",
-        "vsix"
-    ]
+  "cSpell.words": [
+    "Backend",
+    "LOCALAPPDATA",
+    "MSEDGE",
+    "activitybar",
+    "blackbox",
+    "devtool",
+    "edgedevtools",
+    "finalhandler",
+    "geolocations",
+    "monospace",
+    "opencode",
+    "repo",
+    "repos",
+    "revealable",
+    "screencast",
+    "undocked",
+    "unhandledrejection",
+    "userdatadir",
+    "vsce",
+    "vsix"
+  ],
+  "cmake.ignoreCMakeListsMissing": true
 }
