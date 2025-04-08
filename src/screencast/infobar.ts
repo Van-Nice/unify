@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 import { html, render } from 'lit-html';
-import { createRef, ref } from 'lit-html/directives/ref.js'
+import { createRef, ref } from 'lit-html/directives/ref.js';
 import { styleMap, StyleInfo } from 'lit-html/directives/style-map.js';
 
 interface InfobarProps {
     message: string;
 }
 
-export default class InfobarComponent {
+export class InfobarComponent {
     #buttonRef = createRef();
     #message: string;
     #container: HTMLElement | undefined;
@@ -21,8 +21,8 @@ export default class InfobarComponent {
     }
 
     #update(styles?: StyleInfo) {
-        let customStyles = styles ?? {
-            display: 'flex'
+        const customStyles = styles ?? {
+            display: 'flex',
         };
 
         if (!this.#container) {
@@ -41,7 +41,7 @@ export default class InfobarComponent {
     }
 
     #onClick = () => {
-        let styles = {
+        const styles = {
             display: 'none',
         } as StyleInfo;
 

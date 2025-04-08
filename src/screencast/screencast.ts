@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { html, render } from "lit-html";
+import { html, render } from 'lit-html';
 
-import { ScreencastCDPConnection, vscode } from "./cdp";
-import { MouseEventMap, ScreencastInputHandler } from "./input";
-import DimensionComponent from "./dimensionComponent";
+import { ScreencastCDPConnection, vscode } from './cdp';
+import { MouseEventMap, ScreencastInputHandler } from './input';
+import DimensionComponent from './dimensionComponent';
 import {
   getEmulatedDeviceDetails,
   groupEmulatedDevicesByType,
-} from "./emulatedDeviceHelpers";
-import FlyoutMenuComponent, { OffsetDirection } from "./flyoutMenuComponent";
-import InfobarComponent from "./infobar";
+} from './emulatedDeviceHelpers';
+import FlyoutMenuComponent, { OffsetDirection } from './flyoutMenuComponent';
 
-import { encodeMessageForChannel } from "../common/webviewEvents";
+import { encodeMessageForChannel } from '../common/webviewEvents';
 
 type NavigationEntry = {
   id: number;
@@ -39,72 +38,72 @@ export class Screencast {
   private emulatedHeight = 0;
   private inspectMode = false;
   private mediaFeatureConfig = new Map();
-  private emulatedMedia = "";
+  private emulatedMedia = '';
   private isTouchMode = false;
-  private deviceUserAgent = "";
+  private deviceUserAgent = '';
 
   constructor() {
-    this.backButton = document.getElementById("back") as HTMLButtonElement;
+    this.backButton = document.getElementById('back') as HTMLButtonElement;
     this.forwardButton = document.getElementById(
-      "forward"
+      'forward'
     ) as HTMLButtonElement;
     this.inspectButton = document.getElementById(
-      "inspect"
+      'inspect'
     ) as HTMLButtonElement;
-    this.mainWrapper = document.getElementById("main") as HTMLElement;
-    this.reloadButton = document.getElementById("reload") as HTMLButtonElement;
-    this.urlInput = document.getElementById("url") as HTMLInputElement;
+    this.mainWrapper = document.getElementById('main') as HTMLElement;
+    this.reloadButton = document.getElementById('reload') as HTMLButtonElement;
+    this.urlInput = document.getElementById('url') as HTMLInputElement;
     this.screencastImage = document.getElementById(
-      "canvas"
+      'canvas'
     ) as HTMLImageElement;
-    this.toolbar = document.getElementById("toolbar") as HTMLElement;
-    this.emulationBar = document.getElementById("emulation-bar") as HTMLElement;
+    this.toolbar = document.getElementById('toolbar') as HTMLElement;
+    this.emulationBar = document.getElementById('emulation-bar') as HTMLElement;
     this.inactiveOverlay = document.getElementById(
-      "inactive-overlay"
+      'inactive-overlay'
     ) as HTMLElement;
 
-    this.backButton.addEventListener("click", () => this.onBackClick());
-    this.forwardButton.addEventListener("click", () => this.onForwardClick());
-    this.inspectButton.addEventListener("click", () => this.onInspectClick());
-    this.reloadButton.addEventListener("click", () => this.onReloadClick());
-    this.urlInput.addEventListener("keydown", (event) =>
+    this.backButton.addEventListener('click', () => this.onBackClick());
+    this.forwardButton.addEventListener('click', () => this.onForwardClick());
+    this.inspectButton.addEventListener('click', () => this.onInspectClick());
+    this.reloadButton.addEventListener('click', () => this.onReloadClick());
+    this.urlInput.addEventListener('keydown', event =>
       this.onUrlKeyDown(event)
     );
 
     const emulatedDevices = groupEmulatedDevicesByType();
-    InfobarComponent.render(
-      {
-        message:
-          "This is a simulated preview with limited functionality. Deactivate 'Headless mode' in extension settings for a full experience.",
-      },
-      "infobar"
-    );
+    // InfobarComponent.render(
+    //   {
+    //     message:
+    //       "This is a simulated preview with limited functionality. Deactivate 'Headless mode' in extension settings for a full experience.",
+    //   },
+    //   "infobar"
+    // );
     FlyoutMenuComponent.render(
       {
-        iconName: "codicon-chevron-down",
-        title: "Emulate devices",
-        globalSelectedItem: "responsive",
+        iconName: 'codicon-chevron-down',
+        title: 'Emulate devices',
+        globalSelectedItem: 'responsive',
         displayCurrentSelection: true,
         menuItemSections: [
           {
             onItemSelected: this.onDeviceSelected,
-            menuItems: [{ name: "Responsive", value: "responsive" }],
+            menuItems: [{ name: 'Responsive', value: 'responsive' }],
           },
           {
             onItemSelected: this.onDeviceSelected,
-            menuItems: emulatedDevices.get("phone") || [],
+            menuItems: emulatedDevices.get('phone') || [],
           },
           {
             onItemSelected: this.onDeviceSelected,
-            menuItems: emulatedDevices.get("tablet") || [],
+            menuItems: emulatedDevices.get('tablet') || [],
           },
           {
             onItemSelected: this.onDeviceSelected,
-            menuItems: emulatedDevices.get("notebook") || [],
+            menuItems: emulatedDevices.get('notebook') || [],
           },
         ],
       },
-      "emulation-bar-right"
+      'emulation-bar-right'
     );
     DimensionComponent.render(
       {
@@ -114,96 +113,119 @@ export class Screencast {
           this.toolbar.offsetHeight + this.emulationBar.offsetHeight,
         onUpdateDimensions: this.onUpdateDimensions,
       },
-      "emulation-bar-center"
+      'emulation-bar-center'
     );
 
     render(
       html`
         ${new FlyoutMenuComponent({
-          iconName: "codicon-wand",
-          title: "Emulate CSS media features",
+          iconName: 'codicon-wand',
+          title: 'Emulate CSS media features',
           offsetDirection: OffsetDirection.Right,
           menuItemSections: [
             {
               onItemSelected: this.onEmulatedMediaSelected,
               menuItems: [
-                { name: "No media type emulation", value: "" },
-                { name: "screen", value: "screen" },
-                { name: "print", value: "print" },
+                { name: 'No media type emulation', value: '' },
+                { name: 'screen', value: 'screen' },
+                { name: 'print', value: 'print' },
               ],
             },
             {
               onItemSelected: this.onPrefersColorSchemeSelected,
               menuItems: [
-                { name: "No prefers-color-scheme emulation", value: "" },
-                { name: "prefers-color-scheme: light", value: "light" },
-                { name: "prefers-color-scheme: dark", value: "dark" },
+                { name: 'No prefers-color-scheme emulation', value: '' },
+                { name: 'prefers-color-scheme: light', value: 'light' },
+                { name: 'prefers-color-scheme: dark', value: 'dark' },
               ],
             },
             {
               onItemSelected: this.onForcedColorsSelected,
               menuItems: [
-                { name: "No forced-colors emulation", value: "" },
-                { name: "forced-colors: none", value: "none" },
-                { name: "forced-colors: active", value: "active" },
+                { name: 'No forced-colors emulation', value: '' },
+                { name: 'forced-colors: none', value: 'none' },
+                { name: 'forced-colors: active', value: 'active' },
               ],
             },
           ],
         }).template()}
         ${new FlyoutMenuComponent({
-          iconName: "codicon-eye",
-          title: "Emulate vision deficiencies",
+          iconName: 'codicon-eye',
+          title: 'Emulate vision deficiencies',
           offsetDirection: OffsetDirection.Right,
           menuItemSections: [
             {
               onItemSelected: this.onVisionDeficiencySelected,
               menuItems: [
-                { name: "No vision deficiency emulation", value: "none" },
-                { name: "Blurred vision", value: "blurredVision" },
-                { name: "Protanopia", value: "protanopia" },
-                { name: "Deuteranopia", value: "deuteranopia" },
-                { name: "Tritanopia", value: "tritanopia" },
-                { name: "Achromatopsia", value: "achromatopsia" },
+                { name: 'No vision deficiency emulation', value: 'none' },
+                { name: 'Blurred vision', value: 'blurredVision' },
+                { name: 'Protanopia', value: 'protanopia' },
+                { name: 'Deuteranopia', value: 'deuteranopia' },
+                { name: 'Tritanopia', value: 'tritanopia' },
+                { name: 'Achromatopsia', value: 'achromatopsia' },
               ],
             },
           ],
         }).template()}
       `,
-      document.getElementById("emulation-bar-left")!
+      document.getElementById('emulation-bar-left')!
     );
 
-    this.cdpConnection.registerForEvent("Page.frameNavigated", (result) =>
-      this.onFrameNavigated(result)
-    );
-    this.cdpConnection.registerForEvent("Page.screencastFrame", (result) =>
-      this.onScreencastFrame(result)
-    );
+  this.cdpConnection.registerForEvent('Page.frameNavigated', result => {
+    // Validate the result has the expected structure
+    if (result && typeof result === 'object' && 'frame' in result) {
+      this.onFrameNavigated(result as { frame: { parentId?: string } });
+    } else {
+      console.warn('Received unexpected format for Page.frameNavigated event:', result);
+    }
+    });
+    this.cdpConnection.registerForEvent('Page.screencastFrame', result => {
+      if (result && typeof result === 'object' && 'data' in result && 'sessionId' in result) {
+        this.onScreencastFrame(result as { data: string; sessionId: string });
+      } else {
+        console.warn('Received unexpected format for Page.screencastFrame event:', result);
+      }
+    });
     this.cdpConnection.registerForEvent(
-      "Page.screencastVisibilityChanged",
-      (result) => this.onScreencastVisibilityChanged(result)
+      'Page.screencastVisibilityChanged',
+      result => {
+        if (result && typeof result === 'object' && 'visible' in result) {
+          this.onScreencastVisibilityChanged(result as { visible: boolean });
+        } else {
+          console.warn('Received unexpected format for Page.screencastVisibilityChanged event:', result);
+        }
+      }
     );
 
     // This message comes from the DevToolsPanel instance.
-    this.cdpConnection.registerForEvent("DevTools.toggleInspect", (result) =>
-      this.onToggleInspect(result)
-    );
-    this.cdpConnection.registerWriteToClipboardFunction((result) =>
+    this.cdpConnection.registerForEvent('DevTools.toggleInspect', (result: { enabled?: boolean }) => {
+      if (result && typeof result.enabled === 'boolean') {
+        this.onToggleInspect({ enabled: result.enabled ?? false });
+      } else {
+        console.warn('Received unexpected format for DevTools.toggleInspect event:', result);
+      }
+    });
+    this.cdpConnection.registerWriteToClipboardFunction(result =>
       this.onSaveToClipboard(result)
     );
     this.cdpConnection.registerReadClipboardAndPasteFunction(() =>
       this.getClipboardContents()
     );
-    this.cdpConnection.registerForEvent("readClipboard", (clipboardContents) =>
-      this.pasteClipboardContents(clipboardContents)
-    );
+    this.cdpConnection.registerForEvent('readClipboard', clipboardContents => {
+      if (typeof clipboardContents === 'string') {
+        this.pasteClipboardContents(clipboardContents);
+      } else {
+        console.warn('Clipboard contents are not a string:', clipboardContents);
+      }
+    });
 
     this.inputHandler = new ScreencastInputHandler(this.cdpConnection);
 
-    this.cdpConnection.sendMessageToBackend("Page.enable", {});
+    this.cdpConnection.sendMessageToBackend('Page.enable', {});
 
     // Optimizing the resize event to limit how often can it be called.
     let resizeTimeout = 0 as unknown as NodeJS.Timeout;
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => this.updateEmulation(), 100);
     });
@@ -217,12 +239,12 @@ export class Screencast {
 
   private registerInputListeners(): void {
     // Disable context menu on screencast image
-    this.screencastImage.addEventListener("contextmenu", (event) =>
+    this.screencastImage.addEventListener('contextmenu', event =>
       event.preventDefault()
     );
 
     for (const eventName of Object.keys(MouseEventMap)) {
-      this.screencastImage.addEventListener(eventName, (event) => {
+      this.screencastImage.addEventListener(eventName, event => {
         const scale = this.screencastImage.offsetWidth / this.emulatedWidth;
         const mouseEvent = event as MouseEvent;
         if (this.isTouchMode && !this.inspectMode) {
@@ -233,8 +255,8 @@ export class Screencast {
       });
     }
 
-    for (const eventName of ["keydown", "keyup"]) {
-      this.screencastImage.addEventListener(eventName, (event) => {
+    for (const eventName of ['keydown', 'keyup']) {
+      this.screencastImage.addEventListener(eventName, event => {
         this.inputHandler.emitKeyEvent(event as KeyboardEvent);
       });
     }
@@ -242,9 +264,9 @@ export class Screencast {
 
   private updateHistory(): void {
     this.cdpConnection.sendMessageToBackend(
-      "Page.getNavigationHistory",
+      'Page.getNavigationHistory',
       {},
-      (result) => {
+      (result: { currentIndex: number; entries: NavigationEntry[] }) => {
         const { currentIndex, entries } = result;
         this.history = entries;
         this.historyIndex = currentIndex;
@@ -269,22 +291,22 @@ export class Screencast {
       maxTouchPoints: 1,
     };
 
-    this.cdpConnection.sendMessageToBackend("Emulation.setUserAgentOverride", {
+    this.cdpConnection.sendMessageToBackend('Emulation.setUserAgentOverride', {
       userAgent: this.deviceUserAgent,
     });
     this.cdpConnection.sendMessageToBackend(
-      "Emulation.setDeviceMetricsOverride",
+      'Emulation.setDeviceMetricsOverride',
       deviceMetricsParams
     );
     this.cdpConnection.sendMessageToBackend(
-      "Emulation.setTouchEmulationEnabled",
+      'Emulation.setTouchEmulationEnabled',
       touchEmulationParams
     );
     this.updateScreencast();
   }
 
   private onDeviceSelected = (value: string) => {
-    const isResponsive = value === "responsive";
+    const isResponsive = value === 'responsive';
     let isTouchMode = false;
     if (isResponsive) {
       this.emulatedWidth = this.mainWrapper.offsetWidth;
@@ -292,7 +314,7 @@ export class Screencast {
         this.mainWrapper.offsetHeight -
         this.toolbar.offsetHeight -
         this.emulationBar.offsetHeight;
-      this.deviceUserAgent = "";
+      this.deviceUserAgent = '';
     } else {
       const device = getEmulatedDeviceDetails(value);
       if (!device) {
@@ -300,7 +322,7 @@ export class Screencast {
       }
       if (device.modes) {
         const defaultDeviceMode = device.modes.find(
-          (mode) => mode.title === "default"
+          mode => mode.title === 'default'
         );
 
         if (!defaultDeviceMode) {
@@ -311,20 +333,20 @@ export class Screencast {
 
         this.emulatedWidth =
           device.screen[
-            defaultDeviceMode.orientation as "horizontal" | "vertical"
+            defaultDeviceMode.orientation as 'horizontal' | 'vertical'
           ].width;
         this.emulatedHeight =
           device.screen[
-            defaultDeviceMode.orientation as "horizontal" | "vertical"
+            defaultDeviceMode.orientation as 'horizontal' | 'vertical'
           ].height;
       } else {
         this.emulatedWidth = device.screen.vertical.width;
         this.emulatedHeight = device.screen.vertical.height;
       }
-      this.deviceUserAgent = device["user-agent"];
+      this.deviceUserAgent = device['user-agent'];
       isTouchMode =
-        device.capabilities.includes("touch") ||
-        device.capabilities.includes("mobile");
+        device.capabilities.includes('touch') ||
+        device.capabilities.includes('mobile');
     }
 
     this.setTouchMode(isTouchMode);
@@ -335,33 +357,33 @@ export class Screencast {
       !isResponsive
     );
     this.updateEmulation();
-    this.sendEmulationTelemetry("device", value);
+    this.sendEmulationTelemetry('device', value);
   };
 
   private onVisionDeficiencySelected = (value: string) => {
     this.cdpConnection.sendMessageToBackend(
-      "Emulation.setEmulatedVisionDeficiency",
+      'Emulation.setEmulatedVisionDeficiency',
       { type: value }
     );
-    this.sendEmulationTelemetry("visionDeficiency", value);
+    this.sendEmulationTelemetry('visionDeficiency', value);
   };
 
   private onEmulatedMediaSelected = (value: string) => {
     this.emulatedMedia = value;
     this.updateMediaFeatures();
-    this.sendEmulationTelemetry("emulatedMedia", value);
+    this.sendEmulationTelemetry('emulatedMedia', value);
   };
 
   private onForcedColorsSelected = (value: string) => {
-    this.mediaFeatureConfig.set("forced-colors", value);
+    this.mediaFeatureConfig.set('forced-colors', value);
     this.updateMediaFeatures();
-    this.sendEmulationTelemetry("forcedColors", value);
+    this.sendEmulationTelemetry('forcedColors', value);
   };
 
   private onPrefersColorSchemeSelected = (value: string) => {
-    this.mediaFeatureConfig.set("prefers-color-scheme", value);
+    this.mediaFeatureConfig.set('prefers-color-scheme', value);
     this.updateMediaFeatures();
-    this.sendEmulationTelemetry("prefersColorScheme", value);
+    this.sendEmulationTelemetry('prefersColorScheme', value);
   };
 
   private onUpdateDimensions = (width: number, height: number) => {
@@ -371,8 +393,8 @@ export class Screencast {
   };
 
   private updateMediaFeatures = () => {
-    let features = [] as { name: string; value: string }[];
-    this.mediaFeatureConfig.forEach((value, name) => {
+    const features = [] as { name: string; value: string }[];
+    this.mediaFeatureConfig.forEach((value: string, name: string) => {
       features.push({ name, value });
     });
     const payload = {
@@ -380,20 +402,20 @@ export class Screencast {
       media: this.emulatedMedia,
     };
     this.cdpConnection.sendMessageToBackend(
-      "Emulation.setEmulatedMedia",
+      'Emulation.setEmulatedMedia',
       payload
     );
   };
 
   private updateScreencast(): void {
     const screencastParams = {
-      format: "png",
+      format: 'png',
       quality: 100,
       maxWidth: Math.floor(this.emulatedWidth * window.devicePixelRatio),
       maxHeight: Math.floor(this.emulatedHeight * window.devicePixelRatio),
     };
     this.cdpConnection.sendMessageToBackend(
-      "Page.startScreencast",
+      'Page.startScreencast',
       screencastParams
     );
   }
@@ -401,7 +423,7 @@ export class Screencast {
   private onBackClick(): void {
     if (this.historyIndex > 0) {
       const entryId = this.history[this.historyIndex - 1].id;
-      this.cdpConnection.sendMessageToBackend("Page.navigateToHistoryEntry", {
+      this.cdpConnection.sendMessageToBackend('Page.navigateToHistoryEntry', {
         entryId,
       });
     }
@@ -410,7 +432,7 @@ export class Screencast {
   private onForwardClick(): void {
     if (this.historyIndex < this.history.length - 1) {
       const entryId = this.history[this.historyIndex + 1].id;
-      this.cdpConnection.sendMessageToBackend("Page.navigateToHistoryEntry", {
+      this.cdpConnection.sendMessageToBackend('Page.navigateToHistoryEntry', {
         entryId,
       });
     }
@@ -423,17 +445,17 @@ export class Screencast {
   }
 
   private onInspectClick(): void {
-    vscode.postMessage({ type: "open-devtools" });
+    vscode.postMessage({ type: 'open-devtools' });
   }
 
   private onReloadClick(): void {
-    this.cdpConnection.sendMessageToBackend("Page.reload", {});
+    this.cdpConnection.sendMessageToBackend('Page.reload', {});
   }
 
   private onUrlKeyDown(event: KeyboardEvent): void {
     let url = this.urlInput.value;
-    if (event.key === "Enter" && url) {
-      if (url.startsWith("/") || url[1] === ":") {
+    if (event.key === 'Enter' && url) {
+      if (url.startsWith('/') || url[1] === ':') {
         try {
           url = new URL(`file://${url}`).href;
         } catch {
@@ -441,18 +463,18 @@ export class Screencast {
         }
       }
       if (
-        !url.startsWith("http:") &&
-        !url.startsWith("https:") &&
-        !url.startsWith("file:")
+        !url.startsWith('http:') &&
+        !url.startsWith('https:') &&
+        !url.startsWith('file:')
       ) {
-        url = "http://" + url;
+        url = 'http://' + url;
       }
 
-      this.cdpConnection.sendMessageToBackend("Page.navigate", { url });
+      this.cdpConnection.sendMessageToBackend('Page.navigate', { url });
     }
   }
 
-  private onScreencastFrame({ data, sessionId }: any): void {
+  private onScreencastFrame({ data, sessionId }: { data: string; sessionId: string }): void {
     const expectedRatio = this.emulatedWidth / this.emulatedHeight;
     const actualRatio =
       this.screencastImage.naturalWidth / this.screencastImage.naturalHeight;
@@ -460,7 +482,7 @@ export class Screencast {
     if (expectedRatio !== actualRatio) {
       this.updateEmulation();
     }
-    this.cdpConnection.sendMessageToBackend("Page.screencastFrameAck", {
+    this.cdpConnection.sendMessageToBackend('Page.screencastFrameAck', {
       sessionId,
     });
   }
@@ -472,21 +494,21 @@ export class Screencast {
   }): void {
     if (!visible) {
       // If tab becomes inactive, try to re-enable it
-      this.cdpConnection.sendMessageToBackend("Page.enable", {});
+      this.cdpConnection.sendMessageToBackend('Page.enable', {});
       // Request a new screencast frame
       this.updateScreencast();
     }
     this.inactiveOverlay.hidden = visible;
   }
 
-  private onToggleInspect({ enabled }: any): void {
-    this.setTouchMode(!enabled as boolean);
+  private onToggleInspect({ enabled }: { enabled: boolean }): void {
+    this.setTouchMode(!enabled);
   }
 
   private onSaveToClipboard(message: string): void {
     encodeMessageForChannel(
-      (msg) => vscode.postMessage(msg, "*"),
-      "writeToClipboard",
+      msg => vscode.postMessage(msg, '*'),
+      'writeToClipboard',
       {
         data: {
           message,
@@ -497,11 +519,11 @@ export class Screencast {
 
   private sendEmulationTelemetry(event: string, value: string) {
     encodeMessageForChannel(
-      (msg) => vscode.postMessage(msg, "*"),
-      "telemetry",
+      msg => vscode.postMessage(msg, '*'),
+      'telemetry',
       {
-        event: "screencast",
-        name: "Screencast.Emulation",
+        event: 'screencast',
+        name: 'Screencast.Emulation',
         data: {
           event,
           value,
@@ -512,13 +534,13 @@ export class Screencast {
 
   private getClipboardContents(): void {
     encodeMessageForChannel(
-      (msg) => vscode.postMessage(msg, "*"),
-      "readClipboard"
+      msg => vscode.postMessage(msg, '*'),
+      'readClipboard'
     );
   }
 
   private pasteClipboardContents(message: string) {
-    this.cdpConnection.sendMessageToBackend("Runtime.evaluate", {
+    this.cdpConnection.sendMessageToBackend('Runtime.evaluate', {
       expression: `document.execCommand("insertText", false, "${message.replace(
         /"/g,
         '\\"'
@@ -529,11 +551,11 @@ export class Screencast {
   private setTouchMode(enabled: boolean): void {
     const touchEventsParams = {
       enabled,
-      configuration: enabled ? "mobile" : "desktop",
+      configuration: enabled ? 'mobile' : 'desktop',
     };
-    this.screencastImage.classList.toggle("touch", enabled);
+    this.screencastImage.classList.toggle('touch', enabled);
     this.cdpConnection.sendMessageToBackend(
-      "Emulation.setEmitTouchEventsForMouse",
+      'Emulation.setEmitTouchEventsForMouse',
       touchEventsParams
     );
     this.isTouchMode = enabled;

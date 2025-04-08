@@ -5,9 +5,9 @@ import { Uri } from 'vscode';
 
 export class ScreencastView {
     private webviewCSP: string;
-    private cssPath: Uri
+    private cssPath: Uri;
     private codiconsUri: Uri;
-    private inspectorUri: Uri
+    private inspectorUri: Uri;
     private isDevToolsOpen: boolean;
     private htmlTemplate = (webviewCSP: string, cssPath: Uri, codiconsUri: Uri, inspectorUri: Uri, isDevToolsOpen: boolean) => `<!doctype html>
   <html>

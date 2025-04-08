@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ScreencastCDPConnection } from "./cdp";
+import { ScreencastCDPConnection } from './cdp';
 
 export const MouseEventMap = {
   mousedown: 'mousePressed',
   mouseup: 'mouseReleased',
   mousemove: 'mouseMoved',
-  wheel: 'mouseWheel'
+  wheel: 'mouseWheel',
 };
 
 const MouseButtonMap = [
@@ -15,12 +15,12 @@ const MouseButtonMap = [
     'middle',
     'right',
     'back',
-    'forward'
+    'forward',
 ];
 
 export class ScreencastInputHandler {
     private cdpConnection: ScreencastCDPConnection;
-    private activeTouchParams: any | null;
+    private activeTouchParams: { type: string; x: number; y: number; modifiers: number; button: string; clickCount: number; deltaX?: number; deltaY?: number } | null;
 
     constructor(cdpConnection: ScreencastCDPConnection) {
         this.cdpConnection = cdpConnection;
@@ -41,7 +41,7 @@ export class ScreencastInputHandler {
             button: MouseButtonMap[mouseEvent.button],
             buttons: mouseEvent.buttons,
             deltaX: (mouseEvent as WheelEvent).deltaX,
-            deltaY: (mouseEvent as WheelEvent).deltaY
+            deltaY: (mouseEvent as WheelEvent).deltaY,
         });
     }
 
@@ -94,7 +94,18 @@ export class ScreencastInputHandler {
             return;
         }
 
-        const params: any = {
+        interface TouchParams {
+            type: string;
+            x: number;
+            y: number;
+            modifiers: number;
+            button: string;
+            clickCount: number;
+            deltaX?: number;
+            deltaY?: number;
+        }
+
+        const params: TouchParams = {
             type: eventType,
             x: Math.round(mouseEvent.offsetX / scale),
             y: Math.round(mouseEvent.offsetY / scale),

@@ -69,3 +69,6 @@ coverage/
 resources/favicons/*
 !resources/favicons/.gitkeep
 .DS_Store
+
+#unify
+docs
